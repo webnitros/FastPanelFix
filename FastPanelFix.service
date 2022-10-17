@@ -1,0 +1,15 @@
+Unit]
+  Description=Smart test
+ 
+[Service]
+  ExecStart=/usr/bin/node /root/FastPanelFix/index.js
+  Type=idle
+  KillMode=process
+ 
+  SyslogIdentifier=smart-test
+  SyslogFacility=daemon
+ 
+  Restart=on-failure
+ 
+[Install]
+  WantedBy=multiuser.target
