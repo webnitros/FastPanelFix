@@ -6,7 +6,7 @@
   Type=idle
   KillMode=process
  
-  SyslogIdentifier=smart-test
+  SyslogIdentifier=FastPanelFix
   SyslogFacility=daemon
  
   Restart=on-failure
