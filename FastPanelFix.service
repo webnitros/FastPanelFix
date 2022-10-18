@@ -1,5 +1,5 @@
 [Unit]
-  Description=Smart test
+  Description=FastPanelFix
  
 [Service]
   ExecStart=/usr/bin/node /root/FastPanelFix/index.js
