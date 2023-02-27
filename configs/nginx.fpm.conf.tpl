@@ -75,7 +75,12 @@ server {
 {{- end }}
     root $root_path;
     disable_symlinks if_not_owner from=$root_path;
-    # правильная обработка ошибок с использовнием страниц фреймворка
+
+    include "/etc/nginx/includes/global-settings";
+
+    location ~* ^/core/ {
+        deny			all;
+    }
 
     location / {
         location ~* ^/(manager|core|connectors)/ {
@@ -104,6 +109,12 @@ server {
 
         # точка входа в приложение
         try_files $uri $uri/ @core;
+    }
+
+    include "{{ .VirtualHost.IndexDir }}/../../nginx/*.conf";
+
+    location @core {
+        rewrite ^/(.*)$ /index.php?q=$1&$args last;
     }
 
     location ~ \.php$ {
