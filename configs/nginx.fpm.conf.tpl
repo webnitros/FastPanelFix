@@ -76,49 +76,36 @@ server {
     root $root_path;
     disable_symlinks if_not_owner from=$root_path;
     # правильная обработка ошибок с использовнием страниц фреймворка
-    error_page 403 = @core;
-    error_page 404 = @core;
 
     location / {
-{{- if .VirtualHost.Settings }}
-{{- if .VirtualHost.Settings.ReqLimit }}
+        location ~* ^/(manager|core|connectors)/ {
+            include /etc/nginx/includes/admin-ips;
+            deny            all;
+                location ~* \.php$ {
+                fastcgi_pass unix:/var/run/{{ .VirtualHost.Domain }}.sock;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                include /etc/nginx/fastcgi_params;
+            }
+        }
+
+        {{- if .VirtualHost.Settings }}
+        {{- if .VirtualHost.Settings.ReqLimit }}
         limit_req zone={{ .VirtualHost.Domain }} {{ if .VirtualHost.Settings.BurstFlag -}}burst={{ .VirtualHost.Settings.Burst }} {{ if .VirtualHost.Settings.NoDelay -}}nodelay{{ end -}}{{ end }};
-{{- end }}
-{{- end }}
+        {{- end }}
+        {{- end }}
         index {{ .VirtualHost.IndexPage }};
-        
-        # Безопастно разрешаем Яндекс вебвизор 
+
+        # Безопастно разрешаем Яндекс вебвизор
         set $frame_options 'DENY';
         if ($http_referer !~ '^https?:\/\/([^\/]+\.)?({{ .VirtualHost.Domain }}|webvisor\.com|metri[ck]a\.yandex\.(com|ru|by|com\.tr))\/'){
-            set $frame_options 'SAMEORIGIN';
+        set $frame_options 'SAMEORIGIN';
         }
         add_header X-Frame-Options $frame_options;
-        
+
         # точка входа в приложение
         try_files $uri $uri/ @core;
     }
-    
-    # защита MODX
-    location ~ ^/(\.(?!well_known)|_build|_gitify|_backup|core|config.core.php) {
-       return 404;    
-    }
-    # защита composer
-    location /vendor {
-            return 404;
-    }
-    # защита ядра
-    location /core {
-            return 404;
-    }
-    # защита файлов окружения
-    location /\.env.* {
-            return 404;
-    }
-    # Главные блок переадресации на index.php
-    location @core {
-        rewrite ^/(.*)$ /index.php?q=$1&$args last;
-    }
-    
+
     location ~ \.php$ {
         try_files $uri =404;
 {{- if .VirtualHost.Settings }}
