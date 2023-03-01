@@ -117,12 +117,12 @@ server {
         rewrite ^/(.*)$ /index.php?q=$1&$args last;
     }
 
-    location /rest/ {
-        try_files $uri @modx_rest;
+    #location /rest/ {
+    #    try_files $uri @modx_rest;
     }
-    location @modx_rest {
-        rewrite ^/rest/(.*)$ /rest/index.php?_rest=$1&$args last;
-    }
+    #location @modx_rest {
+    #    rewrite ^/rest/(.*)$ /rest/index.php?_rest=$1&$args last;
+    #}
 
     location ~ \.php$ {
         try_files $uri =404;
